@@ -13,6 +13,7 @@ class WebService
     private $_login_user;
     private $_pwd;
     private $_billing_code;
+    private $_id_cient;
     private $_name_pack;
 
     /**
@@ -22,11 +23,12 @@ class WebService
      * @param $_billing_code
      * @param $_name_pack
      */
-    public function __construct($_login_user, $_pwd, $_billing_code, $_name_pack)
+    public function __construct($_login_user, $_pwd, $_billing_code, $id_client, $_name_pack)
     {
         $this->_login_user = $_login_user;
         $this->_pwd = $_pwd;
         $this->_billing_code = $_billing_code;
+        $this->_id_cient = $id_client;
         $this->_name_pack = $_name_pack;
     }
 
@@ -143,6 +145,8 @@ class WebService
      */
     public function EstadoGuia(array $params)
     {
+
+
         return $this->call_soap(__FUNCTION__, $params, true);
     }
 
@@ -156,11 +160,21 @@ class WebService
         return $this->call_soap(__FUNCTION__, $params, true);
     }
 
+    /**
+     * @param array $params
+     * @return mixed
+     * @throws \Exception
+     */
+    public function EstadoGuiasIdDocumentoCliente(array $params)
+    {
+        return $this->call_soap(__FUNCTION__, $params, true);
+    }
 
     /**
      * @param $name_function
      * @param array $params
-     * @return mixed
+     * @param bool $tracking
+     * @return \SimpleXMLElement
      * @throws \Exception
      */
     private function call_soap($name_function, array $params, $tracking = false)
@@ -177,8 +191,15 @@ class WebService
                 $client = new \SoapClient(self::URL_TRACKING_DISPATCHES);
             }
 
-            $result = $client->$name_function($params);
-            $this->checkAuthentication($result);
+            if(strpos($name_function, 'EstadoGuia') !== false ){
+                $params = array_merge($params, ['ID_Cliente' => $this->_id_cient]);
+                $result = $client->$name_function($params);
+                $resultGuide = $name_function . "Result";
+                $result = simplexml_load_string($result->$resultGuide->any);
+            }else{
+                $result = $client->$name_function($params);
+                $this->checkAuthentication($result);
+            }
 
             return $result;
 

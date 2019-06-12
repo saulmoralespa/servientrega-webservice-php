@@ -13,9 +13,10 @@ class ServientregaTest extends TestCase
         $login_user = 'testajagroup';
         $pwd = 'Colombia1';
         $billing_code = 'SER408';
+        $id_client = '900917801';
         $name_pack = 'Cargue SMP';
 
-        $this->webservice = new WebService($login_user, $pwd, $billing_code, $name_pack);
+        $this->webservice = new WebService($login_user, $pwd, $billing_code, $id_client, $name_pack);
     }
 
 
@@ -155,25 +156,33 @@ class ServientregaTest extends TestCase
         var_dump($data);
     }
 
-    public function testgetStatusGuide()
+    public function testGetStatusGuide()
     {
         $params = [
-           'ID_Cliente' => '',
-           'guia' => '30007691'
+           'guia' => '292710915'
         ];
 
         $data = $this->webservice->EstadoGuia($params);
         var_dump($data);
     }
 
-    public function testgetStatusGuideXML()
+    public function testGetStatusGuideXML()
     {
         $params = [
-            'ID_Cliente' => 'SER408',
-            'guia' => '292710984'
+            'guia' => '292710915'
         ];
 
         $data = $this->webservice->EstadoGuiaXML($params);
+        var_dump($data);
+    }
+
+    public function testGetStatusGuidesDocument()
+    {
+        $params = [
+            'RelacionDocumentos' => '900917801'
+        ];
+
+        $data = $this->webservice->EstadoGuiasIdDocumentoCliente($params);
         var_dump($data);
     }
 }

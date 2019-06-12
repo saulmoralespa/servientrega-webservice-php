@@ -19,11 +19,13 @@ use Servientrega\WebService;
 
 $login_user = 'testajagroup';
 $pwd = 'Colombia1';
+$id_client = '900917801';
 $billing_code = 'SER408';
+
 $name_pack = 'Cargue SMP';
 
 
-$servientrega = new WebService($login_user, $pwd, $billing_code, $name_pack);
+$servientrega = new WebService($login_user, $pwd, $billing_code, $id_client, $name_pack);
 
 ```
 
@@ -156,12 +158,25 @@ var_dump($data);
 
 ```php
 $params = [
-           'ID_Cliente' => 'SER408', or empty
            'guia' => '30007691'
         ];
 
 try{
 $data = $servientrea->EstadoGuia(($params);
+var_dump($data);
+}catch (\Exception $exception){
+ echo $exception->getMessage();
+}
+```
+### EstadoGuiaXML
+
+```php
+$params = [
+           'guia' => '30007691'
+        ];
+
+try{
+$data = $servientrea->EstadoGuiaXML(($params);
 var_dump($data);
 }catch (\Exception $exception){
  echo $exception->getMessage();
