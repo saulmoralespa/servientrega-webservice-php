@@ -198,7 +198,8 @@ class WebService
                 $result = simplexml_load_string($result->$resultGuide->any);
             }else{
                 $result = $client->$name_function($params);
-                $this->checkAuthentication($result);
+                self::checkErros($result);
+
             }
 
             return $result;
@@ -212,9 +213,11 @@ class WebService
      * @param $result
      * @throws \Exception
      */
-    private function checkAuthentication($result)
+    private static function checkErros($result)
     {
-        if (isset($result->arrayGuias->string) && strpos($result->arrayGuias->string, 'Acceso Incorrecto') !== false)
+        if (isset($result->arrayGuias->string) && is_array($result->arrayGuias->string))
+            throw new \Exception(implode(PHP_EOL, $result->arrayGuias->string));
+        if (isset($result->arrayGuias->string) && !$result->CargueMasivoExternoResult)
             throw new \Exception($result->arrayGuias->string);
         if (isset($result->AnularGuiasResult) && strpos($result->AnularGuiasResult, 'Debe Autenticarse') !== false)
             throw new \Exception($result->AnularGuiasResult);

@@ -40,20 +40,20 @@ class ServientregaTest extends TestCase
             'Num_Precinto' => 0,
             'Des_TipoDuracionTrayecto' => 1,
             'Des_Telefono' => 7700380,
-            'Des_Ciudad' => 'BOGOTA',
+            'Des_Ciudad' => 'Rionegro (ANT)',
             'Des_Direccion' => 'CALLE 5 # 66-44',
-            'Nom_Contacto' => 'TRIQUINET',
+            'Nom_Contacto' => 'Deiron Mancipe',
             'Des_VlrCampoPersonalizado1' => '',
             'Num_ValorLiquidado' => 0,
-            'Des_DiceContener' => 'PAQUETE ESTANDAR',
-            'Des_TipoGuia' => 0,
+            'Des_DiceContener' => substr('FÓRMULA VM PRIME/ 100 tabl,LYNDORA,NITRO TECH RIPPED 4 LBS VAINILLA,ENTEROPHYLUS', 0, 50),
+            'Des_TipoGuia' => 1,
             'Num_VlrSobreflete' => 0,
             'Num_VlrFlete' => 0,
             'Num_Descuento' => 0,
             'idePaisOrigen' => 1,
             'idePaisDestino' => 1,
             'Des_IdArchivoOrigen' => 1,
-            'Des_DireccionRemitente' => 'TERMINAL MARITIMO S.P.R.B. ED. ALCAZAR BG N. 2 Y 3',
+            'Des_DireccionRemitente' => '',
             'Num_PesoFacturado' => 0,
             'Est_CanalMayorista' => false,
             'Num_IdentiRemitente' => '',
@@ -61,7 +61,7 @@ class ServientregaTest extends TestCase
             'Num_Alto' => 1,
             'Num_Ancho' => 1,
             'Num_Largo' => 1,
-            'Des_DepartamentoDestino' => 'CUNDINAMARCA',
+            'Des_DepartamentoDestino' => 'Antioquia',
             'Des_DepartamentoOrigen' => '',
             'Gen_Cajaporte' => 0,
             'Gen_Sobreporte' => 0,
@@ -70,26 +70,27 @@ class ServientregaTest extends TestCase
             'Des_UnidadPeso' => 'kg',
             'Num_ValorDeclaradoSobreTotal' => 0,
             'Num_Factura' => 'FACT-001',
-            'Des_CorreoElectronico' => 'cortuclas@gmail.com',
-            'Num_Recaudo' => 0,
-            'Est_EnviarCorreo' => false
+            'Des_CorreoElectronico' => 'example@gmail.com',
+            'Num_Recaudo' => 78000,
+            'Est_EnviarCorreo' => false,
+            'Tipo_Doc_Destinatario' => 'CC',
+            'Ide_Num_Identific_Dest' => '1094163892'
         );
 
         $data = $this->webservice->CargueMasivoExterno($params);
-        $this->assertObjectHasAttribute('CargueMasivoExternoResult', $data, true);
         var_dump($data);
+        $this->assertObjectHasAttribute('CargueMasivoExternoResult', $data, true);
     }
 
     public function testCancelGuides()
     {
         $params = [
-            'num_Guia' => '292710910',
-            'num_GuiaFinal' => '292710910'
+            'num_Guia' => '2052660119',
+            'num_GuiaFinal' => '2052660119'
         ];
 
         $data = $this->webservice->AnularGuias($params);
-        //$this->assertSame('Operacion ejecutada exitosamente', $data->interno->ResultadoAnulacionGuias->Descripcion);
-        var_dump($data);
+        $this->assertSame('Operacion ejecutada exitosamente', $data->interno->ResultadoAnulacionGuias->Descripcion);
     }
 
     public function testGenerateSticker()
@@ -105,7 +106,6 @@ class ServientregaTest extends TestCase
 
         $data = $this->webservice->GenerarGuiaSticker($params);
         $this->assertObjectHasAttribute('GenerarGuiaStickerResult', $data, true);
-        var_dump($data);
     }
 
     public function testGenerateStickerShopVirtuals()
@@ -121,17 +121,15 @@ class ServientregaTest extends TestCase
 
         $data = $this->webservice->GenerarGuiaStickerTiendasVirtuales($params);
         $this->assertObjectHasAttribute('GenerarGuiaStickerTiendasVirtualesResult', $data, true);
-        var_dump($data);
     }
 
     public function testEncryptPassword()
     {
         $params = [
-            'strcontrasena' => 'Colombia1'
+            'strcontrasena' => 'BienVestido2017'
         ];
         $data = $this->webservice->EncriptarContrasena($params);
         $this->assertTrue(is_string($data->EncriptarContrasenaResult));
-        var_dump($data);
     }
 
     public function testDecryptPassword()
@@ -142,7 +140,6 @@ class ServientregaTest extends TestCase
         ];
         $data = $this->webservice->DesencriptarContrasena($params);
         $this->assertTrue(is_string($data->DesencriptarContrasenaResult));
-        var_dump($data);
     }
 
     public function testGetGuide()
@@ -153,7 +150,6 @@ class ServientregaTest extends TestCase
 
         $data = $this->webservice->ConsultarGuia($params);
         $this->assertObjectHasAttribute('ConsultarGuiaResult', $data, true);
-        var_dump($data);
     }
 
     public function testGetStatusGuide()
