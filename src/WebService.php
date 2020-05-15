@@ -6,7 +6,6 @@ namespace Servientrega;
 
 class WebService
 {
-    const URL_GUIDES = 'http://web.servientrega.com:8081/GeneracionGuias.asmx?wsdl';
     const URL_TRACKING_DISPATCHES = 'http://sismilenio.servientrega.com.co/wsrastreoenvios/wsrastreoenvios.asmx?wsdl';
     const NAMESPACE_GUIDES = 'http://tempuri.org/';
 
@@ -15,6 +14,7 @@ class WebService
     private $_billing_code;
     private $_id_cient;
     private $_name_pack;
+    private $_url_guides = 'http://web.servientrega.com:8081/GeneracionGuias.asmx?wsdl';
 
     /**
      * WebService constructor.
@@ -30,6 +30,11 @@ class WebService
         $this->_billing_code = $_billing_code;
         $this->_id_cient = $id_client;
         $this->_name_pack = $_name_pack;
+    }
+
+    public function setUrlGuides(String $url):void
+    {
+        $this->_url_guides = $url;
     }
 
     /**
@@ -94,6 +99,15 @@ class WebService
         return $this->call_soap(__FUNCTION__, $body);
     }
 
+    public function GenerarManifiesto(array $params)
+    {
+        $body = array_merge($params, [
+            'ide_CodFacturacion' => $this->_billing_code
+        ]);
+
+        return $this->call_soap(__FUNCTION__, $body);
+    }
+
     /**
      * @param array $params
      * @return mixed
@@ -146,7 +160,6 @@ class WebService
     public function EstadoGuia(array $params)
     {
 
-
         return $this->call_soap(__FUNCTION__, $params, true);
     }
 
@@ -184,7 +197,7 @@ class WebService
 
             if (!$tracking){
                 $headerData = strpos($name_function, 'Contrasena') !== false ? '' : $this->paramsHeader();
-                $client = new \SoapClient(self::URL_GUIDES);
+                $client = new \SoapClient($this->_url_guides);
                 $header = new \SoapHeader(self::NAMESPACE_GUIDES, 'AuthHeader', $headerData);
                 $client->__setSoapHeaders($header);
             }else{
