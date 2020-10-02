@@ -10,10 +10,13 @@ class ServientregaTest extends TestCase
 
     protected function setUp()
     {
-        $login_user = 'testajagroup';
-        $pwd = 'Colombia1';
-        $billing_code = 'SER408';
-        $id_client = '900917801';
+        $dotenv = Dotenv\Dotenv::createMutable(__DIR__ . '/../');
+        $dotenv->load();
+
+        $login_user = $_ENV['USER'];
+        $pwd = $_ENV['PASSWORD'];
+        $billing_code = $_ENV['BILLING_CODE'];
+        $id_client = $_ENV['ID_CLIENT'];
         $name_pack = 'Cargue SMP';
 
         $this->webservice = new WebService($login_user, $pwd, $billing_code, $id_client, $name_pack);
@@ -22,7 +25,6 @@ class ServientregaTest extends TestCase
 
     public function testGenerateGuia()
     {
-
         $params = array(
             'Num_Guia' => 0,
             'Num_Sobreporte' => 0,
@@ -78,7 +80,6 @@ class ServientregaTest extends TestCase
         );
 
         $data = $this->webservice->CargueMasivoExterno($params);
-        var_dump($data);
         $this->assertObjectHasAttribute('CargueMasivoExternoResult', $data, true);
     }
 
@@ -180,5 +181,39 @@ class ServientregaTest extends TestCase
 
         $data = $this->webservice->EstadoGuiasIdDocumentoCliente($params);
         var_dump($data);
+    }
+
+    public function testGetToken()
+    {
+        $data = $this->webservice->getToken();
+        $this->assertAttributeNotEmpty('token', $data);
+    }
+
+    public function testLiquidation()
+    {
+        $params = [
+            'IdProducto'          => 2,
+            'NumeroPiezas'        => 1,
+            'Piezas'              =>
+                [
+                    [
+                        'Peso'  => 1,
+                        'Largo' => 10,
+                        'Ancho' => 5,
+                        'Alto'  => 10,
+                    ]
+                ],
+            'ValorDeclarado'      => 50000,
+            'IdDaneCiudadOrigen'  => '11001000',
+            'IdDaneCiudadDestino' => '11001000',
+            'EnvioConCobro'       => true,
+            'FormaPago'           => 2,
+            'TiempoEntrega'       => 1,
+            'MedioTransporte'     => 1,
+            'NumRecaudo'          => 1
+        ];
+
+        $data = $this->webservice->liquidation($params);
+        $this->assertAttributeNotEmpty('ValorTotal', $data);
     }
 }
