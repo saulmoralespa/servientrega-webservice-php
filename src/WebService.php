@@ -11,10 +11,7 @@ class WebService
     const URL_TRACKING_DISPATCHES = 'http://sismilenio.servientrega.com.co/wsrastreoenvios/wsrastreoenvios.asmx?wsdl';
     const NAMESPACE_GUIDES = 'http://tempuri.org/';
 
-    const API_BASE_QUOTE_URL = 'http://web.servientrega.com:8058/CotizadorCorporativo/api/';
-
-    //http://web.servientrega.com:8058/CotizadorCorporativo/api/autenticacion/login
-    //http://web.servientrega.com:8058/CotizadorCorporativo/api/Cotizacion
+    const API_BASE_QUOTE_URL = 'https://servientregacotz.herokuapp.com/';
 
     private $_login_user;
     private $_pwd;

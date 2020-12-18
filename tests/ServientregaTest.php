@@ -73,7 +73,7 @@ class ServientregaTest extends TestCase
             'Num_ValorDeclaradoSobreTotal' => 0,
             'Num_Factura' => 'FACT-001',
             'Des_CorreoElectronico' => 'example@gmail.com',
-            'Num_Recaudo' => 78000,
+            'Num_Recaudo' => 0,
             'Est_EnviarCorreo' => false,
             'Tipo_Doc_Destinatario' => 'CC',
             'Ide_Num_Identific_Dest' => '1094163892'
@@ -160,7 +160,6 @@ class ServientregaTest extends TestCase
         ];
 
         $data = $this->webservice->EstadoGuia($params);
-        var_dump($data);
     }
 
     public function testGetStatusGuideXML()
@@ -170,7 +169,6 @@ class ServientregaTest extends TestCase
         ];
 
         $data = $this->webservice->EstadoGuiaXML($params);
-        var_dump($data);
     }
 
     public function testGetStatusGuidesDocument()
@@ -180,32 +178,31 @@ class ServientregaTest extends TestCase
         ];
 
         $data = $this->webservice->EstadoGuiasIdDocumentoCliente($params);
-        var_dump($data);
     }
 
     public function testGetToken()
     {
         $data = $this->webservice->getToken();
-        $this->assertAttributeNotEmpty('token', $data);
+        $this->assertNotEmpty($data);
     }
 
     public function testLiquidation()
     {
         $params = [
-            'IdProducto'          => 2,
+            'IdProducto'          => 6,
             'NumeroPiezas'        => 1,
             'Piezas'              =>
                 [
                     [
-                        'Peso'  => 1,
+                        'Peso'  => 4,
                         'Largo' => 10,
                         'Ancho' => 5,
-                        'Alto'  => 10,
+                        'Alto'  => 3,
                     ]
                 ],
-            'ValorDeclarado'      => 50000,
-            'IdDaneCiudadOrigen'  => '11001000',
-            'IdDaneCiudadDestino' => '11001000',
+            'ValorDeclarado'      => 10000,
+            'IdDaneCiudadOrigen'  => '76892000',
+            'IdDaneCiudadDestino' => '76001000',
             'EnvioConCobro'       => true,
             'FormaPago'           => 2,
             'TiempoEntrega'       => 1,
@@ -214,6 +211,6 @@ class ServientregaTest extends TestCase
         ];
 
         $data = $this->webservice->liquidation($params);
-        $this->assertAttributeNotEmpty('ValorTotal', $data);
+        $this->assertNotEmpty($data);
     }
 }

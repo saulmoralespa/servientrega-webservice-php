@@ -1,5 +1,6 @@
 {
     "name": "saulmoralespa/servientrega-webservice-php",
+    "description": "Web service Servientrega PHP",
     "license": "MIT",
     "authors": [
         {
@@ -11,14 +12,14 @@
     ],
     "type": "library",
     "require": {
-        "php": ">=7.1",
+        "php": ">=7.3",
         "ext-soap": "*",
         "ext-simplexml": "*",
-        "guzzlehttp/guzzle": "^7.1",
-        "vlucas/phpdotenv": "^5.2"
+        "guzzlehttp/guzzle": "^7.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.0"
+        "vlucas/phpdotenv": "^5.2",
+        "phpunit/phpunit": "^7.0"
     },
     "autoload": {
         "psr-4": {
