@@ -15,7 +15,7 @@
         "php": ">=7.3",
         "ext-soap": "*",
         "ext-simplexml": "*",
-        "guzzlehttp/guzzle": "^7.2"
+        "guzzlehttp/guzzle": "^6.5.4"
     },
     "require-dev": {
         "vlucas/phpdotenv": "^5.2",
