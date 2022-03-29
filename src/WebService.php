@@ -299,7 +299,7 @@ class WebService
 
     public static function responseJson($response)
     {
-        return \GuzzleHttp\json_decode(
+        return Utils::jsonDecode(
             $response->getBody()->getContents()
         );
     }
