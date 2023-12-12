@@ -268,11 +268,11 @@ class WebService
 
             if(strpos($name_function, 'EstadoGuia') !== false ){
                 $params = array_merge($params, ['ID_Cliente' => $this->_id_cient]);
-                $result = $client->$name_function($params);
+                $result = $client->{$name_function}($params);
                 $resultGuide = $name_function . "Result";
                 $result = simplexml_load_string($result->$resultGuide->any);
             }else{
-                $result = $client->$name_function($params);
+                $result = $client->{$name_function}($params);
                 self::checkErros($result);
             }
 
