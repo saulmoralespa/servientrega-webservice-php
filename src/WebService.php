@@ -3,6 +3,7 @@
 namespace Servientrega;
 
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Utils;
 
@@ -10,67 +11,112 @@ class WebService
 {
     const URL_TRACKING_DISPATCHES = 'http://sismilenio.servientrega.com.co/wsrastreoenvios/wsrastreoenvios.asmx?wsdl';
     const NAMESPACE_GUIDES = 'http://tempuri.org/';
+    protected string $urlGuides = 'http://web.servientrega.com:8081/GeneracionGuias.asmx?wsdl';
+    protected string $urlQuote = 'http://web.servientrega.com:8058/CotizadorCorporativo/api/';
 
-    const API_BASE_QUOTE_URL = 'https://servientregacotz.herokuapp.com/';
-
-    private $_login_user;
-    private $_pwd;
-    private $_billing_code;
-    private $_id_cient;
-    private $_name_pack;
-    private $_url_guides = 'http://web.servientrega.com:8081/GeneracionGuias.asmx?wsdl';
-
-    /**
-     * WebService constructor.
-     * @param $_login_user
-     * @param $_pwd
-     * @param $_billing_code
-     * @param $_name_pack
-     */
-    public function __construct($_login_user, $_pwd, $_billing_code, $id_client, $_name_pack)
+    public function __construct(
+        private $user,
+        private $pwd,
+        private $billingCode,
+        private $idClient,
+        private $namePack = ''
+    )
     {
-        $this->_login_user = $_login_user;
-        $this->_pwd = $_pwd;
-        $this->_billing_code = $_billing_code;
-        $this->_id_cient = $id_client;
-        $this->_name_pack = $_name_pack;
+
     }
 
-    public function client()
+    protected function client(): GuzzleClient
     {
         return new GuzzleClient([
-            'base_uri' => self::API_BASE_QUOTE_URL
+            'base_uri' => $this->urlQuote
         ]);
     }
 
-    public function getToken()
+    private function getTokenFilePath(): string
+    {
+        return dirname(__FILE__) . '/token.json';
+    }
+
+    /**
+     * @throws GuzzleException
+     * @throws \Exception
+     */
+    protected function getToken()
+    {
+        if (file_exists($this->getTokenFilePath())) {
+            $data = json_decode(file_get_contents($this->getTokenFilePath()));
+            $now = new \DateTime('now', new \DateTimeZone('UTC'));
+
+            if ($data && isset($data->expiration) &&
+                $now->format('Y-m-d\TH:i:s.u\Z') < $data->expiration
+            ){
+                return $data->token;
+            }
+        }
+
+        $data = $this->auth();
+        file_put_contents($this->getTokenFilePath(), $data);
+        $response = Utils::jsonDecode($data);
+        return $response->token;
+    }
+
+    public function setUrlGuides(String $url): static
+    {
+        $this->urlGuides = $url;
+        return $this;
+    }
+
+    public function setUrlQuote(String $url): static
+    {
+        $this->urlQuote = $url;
+        return $this;
+    }
+
+    public function invalidateToken(): void
+    {
+        if (file_exists($this->getTokenFilePath())) {
+            file_put_contents($this->getTokenFilePath(), '');
+        }
+    }
+
+
+    /**
+     * @throws GuzzleException
+     * @throws \Exception
+     */
+    private function auth(): string
     {
         try{
-            $pwd = $this->EncriptarContrasena(['strcontrasena' => $this->_pwd]);
+            $pwd = $this->EncriptarContrasena(['strcontrasena' => $this->pwd]);
 
             $response = $this->client()->post('autenticacion/login', [
                 'headers' => [
                     'Content-Type' => 'application/json'
                 ],
                 'json' => [
-                    'login'          => $this->_login_user,
+                    'login'          => $this->user,
                     'password'       => $pwd->EncriptarContrasenaResult,
-                    'codFacturacion' => $this->_billing_code
+                    'codFacturacion' => $this->billingCode
                 ]
             ]);
-            return self::responseJson($response);
+            return $response->getBody()->getContents();
         }catch (RequestException $exception){
             throw new \Exception($exception->getMessage());
         }
     }
 
-    public function liquidation(array $params)
+    /**
+     * @param array $params
+     * @return object
+     * @throws \Exception|GuzzleException
+     */
+    public function liquidation(array $params):object
     {
         try{
             $response = $this->client()->post('Cotizacion', [
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer ' . $this->getToken()->token
+                    'Authorization' => 'Bearer ' . $this->getToken()
                 ],
                 'json' => $params
             ]);
@@ -84,23 +130,17 @@ class WebService
      * @return array
      * @throws \Exception
      */
-    private function paramsHeader()
+    private function paramsHeader(): array
     {
 
-        $pwd = $this->EncriptarContrasena(['strcontrasena' => $this->_pwd]);
+        $pwd = $this->EncriptarContrasena(['strcontrasena' => $this->pwd]);
 
         return [
-            'login' => $this->_login_user,
+            'login' => $this->user,
             'pwd' => $pwd->EncriptarContrasenaResult,
-            'Id_CodFacturacion' => $this->_billing_code,
-            'Nombre_Cargue' => $this->_name_pack
+            'Id_CodFacturacion' => $this->billingCode,
+            'Nombre_Cargue' => $this->namePack
         ];
-    }
-
-
-    public function setUrlGuides(String $url):void
-    {
-        $this->_url_guides = $url;
     }
 
     /**
@@ -108,7 +148,7 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function CargueMasivoExterno(array $params)
+    public function CargueMasivoExterno(array $params): object
     {
 
         $body = [
@@ -129,7 +169,7 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function AnularGuias(array $params)
+    public function AnularGuias(array $params): object
     {
         return $this->call_soap(__FUNCTION__, $params);
     }
@@ -139,10 +179,10 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function GenerarGuiaSticker(array $params)
+    public function GenerarGuiaSticker(array $params): object
     {
         $body = array_merge($params, [
-            'ide_CodFacturacion' => $this->_billing_code
+            'ide_CodFacturacion' => $this->billingCode
         ]);
 
         return $this->call_soap(__FUNCTION__, $body);
@@ -153,10 +193,10 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function GenerarGuiaStickerTiendasVirtuales(array $params)
+    public function GenerarGuiaStickerTiendasVirtuales(array $params): object
     {
         $body = array_merge($params, [
-            'ide_CodFacturacion' => $this->_billing_code
+            'ide_CodFacturacion' => $this->billingCode
         ]);
 
         return $this->call_soap(__FUNCTION__, $body);
@@ -167,7 +207,7 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function DesencriptarContrasena(array $params)
+    public function DesencriptarContrasena(array $params): object
     {
         return $this->call_soap(__FUNCTION__, $params);
     }
@@ -177,7 +217,7 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function EncriptarContrasena(array $params)
+    public function EncriptarContrasena(array $params): object
     {
         return $this->call_soap(__FUNCTION__, $params);
     }
@@ -187,7 +227,7 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function ConsultarGuia(array $params)
+    public function ConsultarGuia(array $params): object
     {
         return $this->call_soap(__FUNCTION__, $params, true);
     }
@@ -197,7 +237,7 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function EstadoGuia(array $params)
+    public function EstadoGuia(array $params): object
     {
         return $this->call_soap(__FUNCTION__, $params, true);
     }
@@ -207,7 +247,7 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function EstadoGuiaXML(array $params)
+    public function EstadoGuiaXML(array $params): object
     {
         return $this->call_soap(__FUNCTION__, $params, true);
     }
@@ -217,7 +257,7 @@ class WebService
      * @return mixed
      * @throws \Exception
      */
-    public function EstadoGuiasIdDocumentoCliente(array $params)
+    public function EstadoGuiasIdDocumentoCliente(array $params): object
     {
         return $this->call_soap(__FUNCTION__, $params, true);
     }
@@ -225,7 +265,7 @@ class WebService
     /**
      * @return array
      */
-    private function optionsSoap()
+    protected function optionsSoap(): array
     {
         return [
             "trace" => true,
@@ -252,22 +292,22 @@ class WebService
      * @return \SimpleXMLElement
      * @throws \Exception
      */
-    private function call_soap($name_function, array $params, $tracking = false)
+    private function call_soap($name_function, array $params, bool $tracking = false):object
     {
         try {
 
             if (!$tracking) {
-                $headerData = strpos($name_function, 'Contrasena') !== false ? '' : $this->paramsHeader();
-                $client = new \SoapClient($this->_url_guides, $this->optionsSoap());
-                $client->__setLocation($this->_url_guides);
+                $headerData = str_contains($name_function, 'Contrasena') ? '' : $this->paramsHeader();
+                $client = new \SoapClient($this->urlGuides, $this->optionsSoap());
+                $client->__setLocation($this->urlGuides);
                 $header = new \SoapHeader(self::NAMESPACE_GUIDES, 'AuthHeader', $headerData);
                 $client->__setSoapHeaders($header);
             } else {
                 $client = new \SoapClient(self::URL_TRACKING_DISPATCHES, $this->optionsSoap());
             }
 
-            if(strpos($name_function, 'EstadoGuia') !== false ){
-                $params = array_merge($params, ['ID_Cliente' => $this->_id_cient]);
+            if(str_contains($name_function, 'EstadoGuia')){
+                $params = array_merge($params, ['ID_Cliente' => $this->idClient]);
                 $result = $client->$name_function($params);
                 $resultGuide = $name_function . "Result";
                 $result = simplexml_load_string($result->$resultGuide->any);
@@ -287,17 +327,17 @@ class WebService
      * @param $result
      * @throws \Exception
      */
-    private static function checkErros($result)
+    private static function checkErros($result): void
     {
         if (isset($result->arrayGuias->string) && is_array($result->arrayGuias->string))
             throw new \Exception(implode(PHP_EOL, $result->arrayGuias->string));
         if (isset($result->arrayGuias->string) && !$result->CargueMasivoExternoResult)
             throw new \Exception($result->arrayGuias->string);
-        if (isset($result->AnularGuiasResult) && strpos($result->AnularGuiasResult, 'Debe Autenticarse') !== false)
+        if (isset($result->AnularGuiasResult) && str_contains($result->AnularGuiasResult, 'Debe Autenticarse'))
             throw new \Exception($result->AnularGuiasResult);
     }
 
-    public static function responseJson($response)
+    public static function responseJson($response):Object
     {
         return Utils::jsonDecode(
             $response->getBody()->getContents()

@@ -6,9 +6,9 @@ use Servientrega\WebService;
 class ServientregaTest extends TestCase
 {
 
-    public $webservice;
+    public WebService $webservice;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $dotenv = Dotenv\Dotenv::createMutable(__DIR__ . '/../');
         $dotenv->load();
@@ -44,7 +44,7 @@ class ServientregaTest extends TestCase
             'Des_Telefono' => 7700380,
             'Des_Ciudad' => 'Rionegro (ANT)',
             'Des_Direccion' => 'CALLE 5 # 66-44',
-            'Nom_Contacto' => 'Deiron Mancipe',
+            'Nom_Contacto' => 'Prueba',
             'Des_VlrCampoPersonalizado1' => '',
             'Num_ValorLiquidado' => 0,
             'Des_DiceContener' => substr('FÓRMULA VM PRIME/ 100 tabl,LYNDORA,NITRO TECH RIPPED 4 LBS VAINILLA,ENTEROPHYLUS', 0, 50),
@@ -80,25 +80,26 @@ class ServientregaTest extends TestCase
         );
 
         $data = $this->webservice->CargueMasivoExterno($params);
-        $this->assertObjectHasAttribute('CargueMasivoExternoResult', $data, true);
+        $this->assertTrue(property_exists($data, 'CargueMasivoExternoResult'));
     }
 
     public function testCancelGuides()
     {
         $params = [
-            'num_Guia' => '2052660119',
-            'num_GuiaFinal' => '2052660119'
+            'num_Guia' => '2191988034',
+            'num_GuiaFinal' => '2191988034'
         ];
 
         $data = $this->webservice->AnularGuias($params);
+        $this->assertTrue(property_exists($data, 'AnularGuiasResult'));
         $this->assertSame('Operacion ejecutada exitosamente', $data->interno->ResultadoAnulacionGuias->Descripcion);
     }
 
     public function testGenerateSticker()
     {
         $params = [
-            'num_Guia' => '292710983',
-            'num_GuiaFinal' => '292710983',
+            'num_Guia' => '2191988034',
+            'num_GuiaFinal' => '2191988034',
             'sFormatoImpresionGuia' => 2,
             'Id_ArchivoCargar' => '0',
             'interno' => false
@@ -106,14 +107,14 @@ class ServientregaTest extends TestCase
         ];
 
         $data = $this->webservice->GenerarGuiaSticker($params);
-        $this->assertObjectHasAttribute('GenerarGuiaStickerResult', $data, true);
+        $this->assertTrue(property_exists($data, 'GenerarGuiaStickerResult'));
     }
 
     public function testGenerateStickerShopVirtuals()
     {
         $params = [
-            'num_Guia' => '292710984',
-            'num_GuiaFinal' => '292710984',
+            'num_Guia' => '2191988031',
+            'num_GuiaFinal' => '2191988031',
             'sFormatoImpresionGuia' => 2,
             'Id_ArchivoCargar' => '0',
             'consumoClienteExterno' => false,
@@ -121,13 +122,13 @@ class ServientregaTest extends TestCase
         ];
 
         $data = $this->webservice->GenerarGuiaStickerTiendasVirtuales($params);
-        $this->assertObjectHasAttribute('GenerarGuiaStickerTiendasVirtualesResult', $data, true);
+        $this->assertTrue(property_exists($data, 'GenerarGuiaStickerTiendasVirtualesResult'));
     }
 
     public function testEncryptPassword()
     {
         $params = [
-            'strcontrasena' => 'BienVestido2017'
+            'strcontrasena' => 'yourpassword'
         ];
         $data = $this->webservice->EncriptarContrasena($params);
         $this->assertTrue(is_string($data->EncriptarContrasenaResult));
@@ -146,62 +147,58 @@ class ServientregaTest extends TestCase
     public function testGetGuide()
     {
         $params = [
-            'NumeroGuia' => '292710915'
+            'NumeroGuia' => '2191988031'
         ];
 
         $data = $this->webservice->ConsultarGuia($params);
-        $this->assertObjectHasAttribute('ConsultarGuiaResult', $data, true);
+        $this->assertTrue(property_exists($data, 'ConsultarGuiaResult'));
     }
 
     public function testGetStatusGuide()
     {
         $params = [
-           'guia' => '292710915'
+           'guia' => '2191988031'
         ];
 
         $data = $this->webservice->EstadoGuia($params);
+        $this->assertTrue(property_exists($data, 'NewDataSet'));
     }
 
     public function testGetStatusGuideXML()
     {
         $params = [
-            'guia' => '292710915'
+            'guia' => '2191988031'
         ];
 
         $data = $this->webservice->EstadoGuiaXML($params);
+        $this->assertTrue(property_exists($data, 'EstadosGuias'));
     }
 
     public function testGetStatusGuidesDocument()
     {
         $params = [
-            'RelacionDocumentos' => '900917801'
+            'RelacionDocumentos' => '2191988031'
         ];
 
         $data = $this->webservice->EstadoGuiasIdDocumentoCliente($params);
     }
 
-    public function testGetToken()
-    {
-        $data = $this->webservice->getToken();
-        $this->assertNotEmpty($data);
-    }
-
     public function testLiquidation()
     {
         $params = [
-            'IdProducto'          => 6,
+            'IdProducto'          => 2,
             'NumeroPiezas'        => 1,
             'Piezas'              =>
                 [
                     [
-                        'Peso'  => 4,
-                        'Largo' => 10,
-                        'Ancho' => 5,
-                        'Alto'  => 3,
+                        'Peso'  => 19,
+                        'Largo' => 120,
+                        'Ancho' => 70,
+                        'Alto'  => 5,
                     ]
                 ],
-            'ValorDeclarado'      => 10000,
-            'IdDaneCiudadOrigen'  => '76892000',
+            'ValorDeclarado'      => 177400,
+            'IdDaneCiudadOrigen'  => '05001000',
             'IdDaneCiudadDestino' => '76001000',
             'EnvioConCobro'       => true,
             'FormaPago'           => 2,
@@ -212,5 +209,12 @@ class ServientregaTest extends TestCase
 
         $data = $this->webservice->liquidation($params);
         $this->assertNotEmpty($data);
+    }
+
+    public function testInvalidateToken()
+    {
+        $this->webservice->invalidateToken();
+        $data = file_get_contents( dirname(__DIR__) . '/src/token.json');
+        $this->assertEmpty($data);
     }
 }

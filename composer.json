@@ -6,20 +6,20 @@
         {
             "name": "Saul Morales",
             "email": "info@saulmoraespa.com",
-            "homepage": "http://saulmoralespa.com",
+            "homepage": "https://saulmoralespa.com",
             "role": "Developer"
         }
     ],
     "type": "library",
     "require": {
-        "php": ">=7.3",
+        "php": ">=8.1",
         "ext-soap": "*",
         "ext-simplexml": "*",
-        "guzzlehttp/guzzle": "^7.2.0"
+        "guzzlehttp/guzzle": "^7.8"
     },
     "require-dev": {
-        "vlucas/phpdotenv": "^5.2",
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": "^10.0",
+        "vlucas/phpdotenv": "^5.6"
     },
     "autoload": {
         "psr-4": {

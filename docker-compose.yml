@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  php81:
+    image: php:8.1-apache
+    container_name: php81-container
+    ports:
+      - "8081:80"
+    volumes:
+      - ./php81:/var/www/html
+  php82:
+    image: php:8.2-apache
+    container_name: php82-container
+    ports:
+      - "8082:80"
+    volumes:
+      - ./php82:/var/www/html
+  php83:
+    image: php:8.3-apache
+    container_name: php83-container
+    ports:
+      - "8083:80"
+    volumes:
+      - ./php83:/var/www/html

@@ -3,8 +3,9 @@ Servientrega Webservice PHP
 
 ## Installation
 
-Use composer package manager
+You will need at least PHP 8.1. We match [officially supported](https://www.php.net/supported-versions.php) versions of PHP.
 
+Use [composer](https://getcomposer.org/) package manager to install the lastest version of the package:
 
 ```bash
 composer require saulmoralespa/servientrega-webservice-php
@@ -17,16 +18,53 @@ include_once __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'a
 // import webservice class
 use Servientrega\WebService;
 
-$login_user = 'testajagroup';
+$user = 'testajagroup';
 $pwd = 'Colombia1';
-$id_client = '900917801';
-$billing_code = 'SER408';
+$billingCode = 'SER408';
+$idClient = '900917801';
 
-$name_pack = 'Cargue SMP';
+//optional
+$namePack = 'My shop';
 
 
-$servientrega = new WebService($login_user, $pwd, $billing_code, $id_client, $name_pack);
+$servientrega = new WebService($user, $pwd, $billingCode, $idClient, $namePack);
 
+//Call this method each time you save credentials
+//Token expire every 4 days
+$servientrega->invalidateToken();;
+```
+
+### Shipping quoting
+
+```php
+$params = [
+            'IdProducto'          => 2, //1 documento unitario  or 6 mercancía industrial 
+            'NumeroPiezas'        => 1,
+            'Piezas'              =>
+                [
+                    [
+                        'Peso'  => 19,
+                        'Largo' => 120,
+                        'Ancho' => 70,
+                        'Alto'  => 5,
+                    ]
+                ],
+            'ValorDeclarado'      => 177400,
+            'IdDaneCiudadOrigen'  => '05001000',
+            'IdDaneCiudadDestino' => '76001000',
+            'EnvioConCobro'       => true,
+            'FormaPago'           => 2,
+            'TiempoEntrega'       => 1,
+            'MedioTransporte'     => 1,
+            'NumRecaudo'          => 1
+        ];
+  
+try{
+$data = $this->webservice->liquidation($params);
+var_dump($data);
+}catch (\Exception $exception){
+ echo $exception->getMessage();
+}
 ```
 
 ### CargueMasivoExterno
